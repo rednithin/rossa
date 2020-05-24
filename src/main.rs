@@ -20,7 +20,7 @@ struct Opts {
     address: String,
 }
 
-#[tokio::main]
+#[tokio::main(max_threads = 1)]
 async fn main() {
     dotenv::dotenv().unwrap_or_default();
     pretty_env_logger::init();

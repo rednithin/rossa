@@ -1,11 +1,13 @@
 use clap::{self, Clap};
 use dotenv;
 use log;
+use mime_guess;
 use pretty_env_logger;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
-use std::{net::SocketAddr, sync::Arc};
+use rust_embed::RustEmbed;
+use std::{net::SocketAddr, str, sync::Arc};
 use tera::{Context, Tera};
-use warp::Filter;
+use warp::{http::HeaderValue, reply::Response, Filter, Rejection, Reply};
 
 /// A SimpleHTTPServer clone written in Rust.
 /// This is also inspired by gossa - https://github.com/pldubouilh/gossa.
@@ -20,6 +22,26 @@ struct Opts {
     address: String,
 }
 
+#[derive(RustEmbed)]
+#[folder = "static"]
+struct Asset;
+
+#[derive(RustEmbed)]
+#[folder = "templates"]
+struct Template;
+
+fn serve_impl(path: &str) -> Result<impl Reply, Rejection> {
+    let asset = Asset::get(path).ok_or_else(warp::reject::not_found)?;
+    let mime = mime_guess::from_path(path).first_or_octet_stream();
+
+    let mut res = Response::new(asset.into());
+    res.headers_mut().insert(
+        "content-type",
+        HeaderValue::from_str(mime.as_ref()).unwrap(),
+    );
+    Ok(res)
+}
+
 #[tokio::main(core_threads = 1)]
 async fn main() {
     dotenv::dotenv().unwrap_or_default();
@@ -28,13 +50,17 @@ async fn main() {
     let bind_address: SocketAddr = opts.address.parse().expect("Invalid Bind Address");
 
     // Loading Tera templates.
-    let tera = Arc::new(match Tera::new("templates/**/*.html") {
-        Ok(t) => t,
-        Err(e) => {
-            println!("Parsing error(s): {}", e);
-            ::std::process::exit(1);
-        }
-    });
+    let mut tera = Tera::default();
+
+    for file in Template::iter() {
+        let file_name = file.as_ref();
+        let file_contents = Template::get(file_name).unwrap();
+        let content = str::from_utf8(file_contents.as_ref()).unwrap();
+        tera.add_raw_template(file_name, content)
+            .expect("Failed to add raw template");
+    }
+
+    let tera = Arc::new(tera);
 
     // Generating prefix for static files randomly.
     let random_static_prefix: String = thread_rng().sample_iter(&Alphanumeric).take(30).collect();
@@ -44,7 +70,7 @@ async fn main() {
     );
 
     // Different types of Routes.
-    let favicon_route = warp::path("favicon.ico").and(warp::fs::file("static/favicon.ico"));
+    let favicon_route = warp::path("favicon.ico").map(|| serve_impl("favicon.ico").unwrap());
 
     let static_files_route = warp::path(random_static_prefix.clone()).and(warp::fs::dir("."));
 
@@ -52,7 +78,7 @@ async fn main() {
         warp::path(random_static_prefix.clone()).map(|| format!("Invalid static file path"));
 
     let dynamic_route = warp::path::full()
-        .and(warp::any().map(move || Arc::clone(&tera)))
+        .and(warp::any().map(move || tera.clone()))
         .map(|path, tera: Arc<Tera>| {
             log::info!("The path is {:?}", path);
             warp::reply::html(tera.render("index.html", &Context::new()).unwrap())

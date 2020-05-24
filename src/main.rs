@@ -7,7 +7,7 @@ use warp::Filter;
 
 #[tokio::main]
 async fn main() {
-    dotenv::dotenv().expect("Something wrongh with .env file");
+    dotenv::dotenv().unwrap_or_default();
     pretty_env_logger::init();
 
     // Loading Tera templates once

@@ -36,6 +36,7 @@ async fn main() {
     });
 
     // Different types of Routes
+    let favicon_route = warp::path("favicon.ico").and(warp::fs::file("static/favicon.ico"));
     let static_files_route = warp::path("static").and(warp::fs::dir("."));
 
     let invalid_static_files_route =
@@ -50,7 +51,8 @@ async fn main() {
 
     // Aggregation of the above routes
     let routes = warp::any()
-        .and(static_files_route)
+        .and(favicon_route)
+        .or(static_files_route)
         .or(invalid_static_files_route)
         .or(dynamic_route);
 

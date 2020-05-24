@@ -27,7 +27,7 @@ async fn main() {
     let opts: Opts = Opts::parse();
     let bind_address: SocketAddr = opts.address.parse().expect("Invalid Bind Address");
 
-    // Loading Tera templates once
+    // Loading Tera templates.
     let tera = Arc::new(match Tera::new("templates/**/*.html") {
         Ok(t) => t,
         Err(e) => {
@@ -36,13 +36,16 @@ async fn main() {
         }
     });
 
+    // Generating prefix for static files randomly.
     let random_static_prefix: String = thread_rng().sample_iter(&Alphanumeric).take(30).collect();
     log::info!(
-        "The randomly generated static prefix is {:?}",
+        "The randomly generated static prefix is {:?}.",
         random_static_prefix
     );
-    // Different types of Routes
+
+    // Different types of Routes.
     let favicon_route = warp::path("favicon.ico").and(warp::fs::file("static/favicon.ico"));
+
     let static_files_route = warp::path(random_static_prefix.clone()).and(warp::fs::dir("."));
 
     let invalid_static_files_route =
@@ -55,7 +58,7 @@ async fn main() {
             warp::reply::html(tera.render("index.html", &Context::new()).unwrap())
         });
 
-    // Aggregation of the above routes
+    // Aggregation of the above routes.
     let routes = warp::any()
         .and(favicon_route)
         .or(static_files_route)

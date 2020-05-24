@@ -1,14 +1,30 @@
-use async_std::sync::Arc;
+use async_std::{net::SocketAddr, sync::Arc};
+use clap::{self, Clap};
 use dotenv;
 use log;
 use pretty_env_logger;
 use tera::{Context, Tera};
 use warp::Filter;
 
+/// A SimpleHTTPServer clone written in Rust.
+/// This is also inspired by gossa - https://github.com/pldubouilh/gossa.
+#[derive(Clap)]
+#[clap(
+    version = "1.0.0",
+    author = "P G Nithin Reddy <reddy.nithinpg@gmail.com>"
+)]
+struct Opts {
+    /// `address` must be of the form <IP>:<Port>
+    #[clap(short, long, default_value = "127.0.0.1:3030")]
+    address: String,
+}
+
 #[tokio::main]
 async fn main() {
     dotenv::dotenv().unwrap_or_default();
     pretty_env_logger::init();
+    let opts: Opts = Opts::parse();
+    let bind_address: SocketAddr = opts.address.parse().expect("Invalid Bind Address");
 
     // Loading Tera templates once
     let tera = Arc::new(match Tera::new("templates/**/*.html") {
@@ -38,5 +54,5 @@ async fn main() {
         .or(invalid_static_files_route)
         .or(dynamic_route);
 
-    warp::serve(routes).run(([0, 0, 0, 0], 3030)).await;
+    warp::serve(routes).run(bind_address).await;
 }

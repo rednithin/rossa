@@ -15,7 +15,7 @@ use warp::Filter;
 )]
 struct Opts {
     /// `address` must be of the form <IP>:<Port>
-    #[clap(short, long, default_value = "127.0.0.1:3030")]
+    #[clap(short, long, default_value = "0.0.0.0:8888")]
     address: String,
 }
 

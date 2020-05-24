@@ -63,19 +63,16 @@ async fn main() {
     let tera = Arc::new(tera);
 
     // Generating prefix for static files randomly.
-    let random_static_prefix: String = thread_rng().sample_iter(&Alphanumeric).take(30).collect();
-    log::info!(
-        "The randomly generated static prefix is {:?}.",
-        random_static_prefix
-    );
+    let files_prefix: String = thread_rng().sample_iter(&Alphanumeric).take(30).collect();
+    log::info!("The randomly generated files prefix is {:?}.", files_prefix);
 
     // Different types of Routes.
     let favicon_route = warp::path("favicon.ico").map(|| serve_impl("favicon.ico").unwrap());
 
-    let static_files_route = warp::path(random_static_prefix.clone()).and(warp::fs::dir("."));
+    let files_route = warp::path(files_prefix.clone()).and(warp::fs::dir("."));
 
-    let invalid_static_files_route =
-        warp::path(random_static_prefix.clone()).map(|| format!("Invalid static file path"));
+    let invalid_files_route =
+        warp::path(files_prefix.clone()).map(|| format!("Invalid static file path"));
 
     let dynamic_route = warp::path::full()
         .and(warp::any().map(move || tera.clone()))
@@ -87,8 +84,8 @@ async fn main() {
     // Aggregation of the above routes.
     let routes = warp::any()
         .and(favicon_route)
-        .or(static_files_route)
-        .or(invalid_static_files_route)
+        .or(files_route)
+        .or(invalid_files_route)
         .or(dynamic_route);
 
     warp::serve(routes).run(bind_address).await;

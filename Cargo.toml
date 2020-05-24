@@ -1,0 +1,16 @@
+[package]
+name = "rossa"
+version = "0.1.0"
+authors = ["rednithin <reddy.nithinpg@live.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+warp = "0.2.3"
+tokio = { version = "0.2.21", features = ["macros"] }
+pretty_env_logger = "0.4.0"
+dotenv = "0.15.0"
+log = "0.4.8"
+async-std = "1.6.0"
+tera = "1.3.0"

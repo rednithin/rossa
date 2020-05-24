@@ -1,9 +1,9 @@
-use async_std::{net::SocketAddr, sync::Arc};
 use clap::{self, Clap};
 use dotenv;
 use log;
 use pretty_env_logger;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use std::{net::SocketAddr, sync::Arc};
 use tera::{Context, Tera};
 use warp::Filter;
 

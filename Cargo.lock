@@ -1380,6 +1380,7 @@ dependencies = [
  "dotenv",
  "log 0.4.8",
  "pretty_env_logger",
+ "rand 0.7.3",
  "tera",
  "tokio",
  "warp",

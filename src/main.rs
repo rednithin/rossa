@@ -3,6 +3,7 @@ use clap::{self, Clap};
 use dotenv;
 use log;
 use pretty_env_logger;
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use tera::{Context, Tera};
 use warp::Filter;
 
@@ -35,12 +36,17 @@ async fn main() {
         }
     });
 
+    let random_static_prefix: String = thread_rng().sample_iter(&Alphanumeric).take(30).collect();
+    log::info!(
+        "The randomly generated static prefix is {:?}",
+        random_static_prefix
+    );
     // Different types of Routes
     let favicon_route = warp::path("favicon.ico").and(warp::fs::file("static/favicon.ico"));
-    let static_files_route = warp::path("static").and(warp::fs::dir("."));
+    let static_files_route = warp::path(random_static_prefix.clone()).and(warp::fs::dir("."));
 
     let invalid_static_files_route =
-        warp::path("static").map(|| format!("Invalid static file path"));
+        warp::path(random_static_prefix.clone()).map(|| format!("Invalid static file path"));
 
     let dynamic_route = warp::path::full()
         .and(warp::any().map(move || Arc::clone(&tera)))

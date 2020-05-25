@@ -64,7 +64,7 @@ async fn main() {
         .map(|tera: Arc<Tera>| {
             let mut context = Context::new();
             context.insert("message", "The file you are searching for doesn't exist");
-            warp::reply::html(tera.render("404.html", &context).unwrap())
+            warp::reply::html(tera.render("404.tera", &context).unwrap())
         });
 
     let invalid_path_route = warp::any()
@@ -76,7 +76,7 @@ async fn main() {
                 "message",
                 &format!("The path '.{}' doesn't exist", path.as_str()),
             );
-            warp::reply::html(tera.render("404.html", &context).unwrap())
+            warp::reply::html(tera.render("404.tera", &context).unwrap())
         });
 
     let dynamic_route = warp::any()
@@ -131,9 +131,10 @@ async fn main() {
                     context.insert("files", &files);
                     context.insert("directories", &directories);
                     context.insert("files_prefix", &files_prefix);
+                    context.insert("current_dir", &path);
 
                     Ok(warp::reply::html(
-                        tera.render("index.html", &context).unwrap(),
+                        tera.render("index.tera", &context).unwrap(),
                     ))
                 } else {
                     log::error!("Files not found");

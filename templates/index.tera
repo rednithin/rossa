@@ -6,7 +6,7 @@
     <title>Rossa</title>
   </head>
   <body>
-    <h1>Current Directory</h1>
+    <h1>Current Dir {{ current_dir }}</h1>
 
 
     {% for directory in directories %}

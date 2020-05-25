@@ -34,6 +34,10 @@ fn with_cloneable<T: Clone + std::marker::Send>(
     warp::any().map(move || t.clone())
 }
 
+async fn handle_rejection(_err: Rejection) -> Result<impl Reply, std::convert::Infallible> {
+    Ok(warp::reply::html("Hello"))
+}
+
 #[tokio::main(core_threads = 1)]
 async fn main() {
     dotenv::dotenv().unwrap_or_default();
@@ -64,6 +68,18 @@ async fn main() {
         .map(|tera: Arc<Tera>| {
             let mut context = Context::new();
             context.insert("message", "The file you are searching for doesn't exist");
+            warp::reply::html(tera.render("404.html", &context).unwrap())
+        });
+
+    let invalid_path_route = warp::any()
+        .and(warp::path::full())
+        .and(with_cloneable(tera.clone()))
+        .map(|path: FullPath, tera: Arc<Tera>| {
+            let mut context = Context::new();
+            context.insert(
+                "message",
+                &format!("The path '.{}' doesn't exist", path.as_str()),
+            );
             warp::reply::html(tera.render("404.html", &context).unwrap())
         });
 
@@ -129,7 +145,8 @@ async fn main() {
                     Err(warp::reject::not_found())
                 }
             },
-        );
+        )
+        .or(invalid_path_route);
 
     // Aggregation of the above routes.
     let routes = warp::any()

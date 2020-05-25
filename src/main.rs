@@ -23,14 +23,14 @@ struct Opts {
 }
 
 #[derive(RustEmbed)]
-#[folder = "static"]
+#[folder = "assets"]
 struct Asset;
 
 #[derive(RustEmbed)]
 #[folder = "templates"]
 struct Template;
 
-fn serve_impl(path: &str) -> Result<impl Reply, Rejection> {
+fn serve_asset(path: &str) -> Result<impl Reply, Rejection> {
     let asset = Asset::get(path).ok_or_else(warp::reject::not_found)?;
     let mime = mime_guess::from_path(path).first_or_octet_stream();
 
@@ -67,7 +67,7 @@ async fn main() {
     log::info!("The randomly generated files prefix is {:?}.", files_prefix);
 
     // Different types of Routes.
-    let favicon_route = warp::path("favicon.ico").map(|| serve_impl("favicon.ico").unwrap());
+    let favicon_route = warp::path("favicon.ico").map(|| serve_asset("favicon.ico").unwrap());
 
     let files_route = warp::path(files_prefix.clone()).and(warp::fs::dir("."));
 

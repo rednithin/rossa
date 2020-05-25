@@ -61,6 +61,7 @@ async fn main() {
     }
 
     let tera = Arc::new(tera);
+    let tera1 = tera.clone();
 
     // Generating prefix for static files randomly.
     let files_prefix: String = thread_rng().sample_iter(&Alphanumeric).take(30).collect();
@@ -71,11 +72,16 @@ async fn main() {
 
     let files_route = warp::path(files_prefix.clone()).and(warp::fs::dir("."));
 
-    let invalid_files_route =
-        warp::path(files_prefix.clone()).map(|| format!("Invalid static file path"));
+    let invalid_files_route = warp::path(files_prefix.clone())
+        .and(warp::any().map(move || tera.clone()))
+        .map(|tera: Arc<Tera>| {
+            let mut context = Context::new();
+            context.insert("message", "The file you are searching for doesn't exist");
+            warp::reply::html(tera.render("404.html", &context).unwrap())
+        });
 
     let dynamic_route = warp::path::full()
-        .and(warp::any().map(move || tera.clone()))
+        .and(warp::any().map(move || tera1.clone()))
         .map(|path, tera: Arc<Tera>| {
             log::info!("The path is {:?}", path);
             warp::reply::html(tera.render("index.html", &Context::new()).unwrap())

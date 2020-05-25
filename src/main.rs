@@ -14,7 +14,7 @@ use warp::{http::HeaderValue, path::FullPath, reply::Response, Filter, Rejection
 /// This is also inspired by gossa - https://github.com/pldubouilh/gossa.
 #[derive(Clap)]
 #[clap(
-    version = "1.0.0",
+    version = "0.1.0",
     author = "P G Nithin Reddy <reddy.nithinpg@gmail.com>"
 )]
 struct Opts {

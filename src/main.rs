@@ -55,14 +55,17 @@ async fn main() {
 
     // Different types of Routes.
     let favicon_route = warp::any()
+        .and(warp::get())
         .and(warp::path("favicon.ico"))
         .map(|| serve_asset("favicon.ico").unwrap());
 
     let files_route = warp::any()
+        .and(warp::get())
         .and(warp::path(files_prefix.clone()))
         .and(warp::fs::dir("."));
 
     let invalid_files_route = warp::any()
+        .and(warp::get())
         .and(warp::path(files_prefix.clone()))
         .and(with_cloneable(tera.clone()))
         .map(|tera: Arc<Tera>| {
@@ -72,6 +75,7 @@ async fn main() {
         });
 
     let invalid_path_route = warp::any()
+        .and(warp::get())
         .and(warp::path::full())
         .and(with_cloneable(tera.clone()))
         .map(|path: FullPath, tera: Arc<Tera>| {
@@ -84,6 +88,7 @@ async fn main() {
         });
 
     let dynamic_route = warp::any()
+        .and(warp::get())
         .and(warp::path::full())
         .and(with_cloneable(tera.clone()))
         .and(with_cloneable(files_prefix.clone()))

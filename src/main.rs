@@ -34,10 +34,6 @@ fn with_cloneable<T: Clone + std::marker::Send>(
     warp::any().map(move || t.clone())
 }
 
-async fn handle_rejection(_err: Rejection) -> Result<impl Reply, std::convert::Infallible> {
-    Ok(warp::reply::html("Hello"))
-}
-
 #[tokio::main(core_threads = 1)]
 async fn main() {
     dotenv::dotenv().unwrap_or_default();

@@ -120,6 +120,7 @@ async fn main() {
                             break;
                         }
                     }
+
                     if path.as_str() != "/" {
                         let mut tokens: Vec<&str> = path.as_str().split("/").collect();
                         tokens.pop();
@@ -131,6 +132,9 @@ async fn main() {
                         log::info!("Parent path {:?}", parent_path);
                         directories.push((String::from(".."), parent_path));
                     }
+
+                    directories.sort_unstable();
+                    files.sort_unstable();
 
                     log::info!("The path is {:?}", path);
                     log::info!("Directories: {:?}", directories);

@@ -7,7 +7,8 @@ use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use rust_embed::RustEmbed;
 use std::{net::SocketAddr, str, sync::Arc};
 use tera::{Context, Tera};
-use warp::{http::HeaderValue, reply::Response, Filter, Rejection, Reply};
+use tokio::fs;
+use warp::{http::HeaderValue, path::FullPath, reply::Response, Filter, Rejection, Reply};
 
 /// A SimpleHTTPServer clone written in Rust.
 /// This is also inspired by gossa - https://github.com/pldubouilh/gossa.
@@ -85,13 +86,60 @@ async fn main() {
             warp::reply::html(tera.render("404.html", &context).unwrap())
         });
 
-    let dynamic_route =
-        warp::path::full()
-            .and(with_tera(tera.clone()))
-            .map(|path, tera: Arc<Tera>| {
-                log::info!("The path is {:?}", path);
-                warp::reply::html(tera.render("index.html", &Context::new()).unwrap())
-            });
+    let dynamic_route = warp::path::full()
+        .and(with_tera(tera.clone()))
+        .and(warp::any().map(move || files_prefix.clone()))
+        .and_then(
+            |path: FullPath, tera: Arc<Tera>, files_prefix: String| async move {
+                if let Ok(mut entries) = fs::read_dir(".".to_string() + path.as_str()).await {
+                    log::info!("entries {:?}", entries);
+
+                    let mut directories = vec![];
+                    let mut files = vec![];
+
+                    while let Ok(entry) = entries.next_entry().await {
+                        if let Some(entry) = entry {
+                            if let Ok(entry_type) = entry.file_type().await {
+                                if entry_type.is_dir() {
+                                    directories.push((entry.file_name().into_string().unwrap(), {
+                                        let x = entry.path();
+                                        x.to_str().unwrap().to_string()
+                                    }));
+                                } else {
+                                    files.push((entry.file_name().into_string().unwrap(), {
+                                        let x = entry.path();
+                                        x.to_str().unwrap().to_string()
+                                    }));
+                                }
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                    if path.as_str() != "/" {
+                        directories.push((String::from(".."), String::from("..")));
+                    }
+
+                    log::info!("The path is {:?}", path);
+                    log::info!("Directories: {:?}", directories);
+                    log::info!("Files: {:?}", files);
+
+                    let mut context = Context::new();
+                    context.insert("files", &files);
+                    context.insert("directories", &directories);
+
+                    context.insert("files_prefix", &files_prefix);
+
+                    Ok(warp::reply::html(
+                        tera.render("index.html", &context).unwrap(),
+                    ))
+                } else {
+                    log::error!("Files not found");
+                    log::error!("The path is {:?}", path);
+                    Err(warp::reject::not_found())
+                }
+            },
+        );
 
     // Aggregation of the above routes.
     let routes = warp::any()

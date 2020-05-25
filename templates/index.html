@@ -6,6 +6,29 @@
     <title>Rossa</title>
   </head>
   <body>
-    <h1>Hello World</h1>
+    <h1>Current Directory</h1>
+
+
+    {% for directory in directories %}
+      {% if loop.first %}
+        <h4> Directories </h4>
+      {% endif %}
+      <a href="./{{ directory[1] }}">
+        {{ directory[0] }}
+      </a>
+      <br />
+    {% endfor %}
+
+    <hr />  
+
+    {% for file in files %} 
+      {% if loop.first %}
+        <h4> Files </h4>
+      {% endif %}
+      <a href="{{ files_prefix }}/{{ file[1] }}">
+        {{ file[0] }}
+      </a>
+      <br />
+    {% endfor %}
   </body>
 </html>

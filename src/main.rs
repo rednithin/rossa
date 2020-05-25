@@ -42,6 +42,12 @@ fn serve_asset(path: &str) -> Result<impl Reply, Rejection> {
     Ok(res)
 }
 
+fn with_tera(
+    tera: Arc<Tera>,
+) -> impl Filter<Extract = (Arc<Tera>,), Error = std::convert::Infallible> + Clone {
+    warp::any().map(move || tera.clone())
+}
+
 #[tokio::main(core_threads = 1)]
 async fn main() {
     dotenv::dotenv().unwrap_or_default();
@@ -61,7 +67,6 @@ async fn main() {
     }
 
     let tera = Arc::new(tera);
-    let tera1 = tera.clone();
 
     // Generating prefix for static files randomly.
     let files_prefix: String = thread_rng().sample_iter(&Alphanumeric).take(30).collect();
@@ -73,19 +78,20 @@ async fn main() {
     let files_route = warp::path(files_prefix.clone()).and(warp::fs::dir("."));
 
     let invalid_files_route = warp::path(files_prefix.clone())
-        .and(warp::any().map(move || tera.clone()))
+        .and(with_tera(tera.clone()))
         .map(|tera: Arc<Tera>| {
             let mut context = Context::new();
             context.insert("message", "The file you are searching for doesn't exist");
             warp::reply::html(tera.render("404.html", &context).unwrap())
         });
 
-    let dynamic_route = warp::path::full()
-        .and(warp::any().map(move || tera1.clone()))
-        .map(|path, tera: Arc<Tera>| {
-            log::info!("The path is {:?}", path);
-            warp::reply::html(tera.render("index.html", &Context::new()).unwrap())
-        });
+    let dynamic_route =
+        warp::path::full()
+            .and(with_tera(tera.clone()))
+            .map(|path, tera: Arc<Tera>| {
+                log::info!("The path is {:?}", path);
+                warp::reply::html(tera.render("index.html", &Context::new()).unwrap())
+            });
 
     // Aggregation of the above routes.
     let routes = warp::any()

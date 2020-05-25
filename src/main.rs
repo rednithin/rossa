@@ -28,10 +28,10 @@ fn serve_asset(path: &str) -> Result<impl Reply, Rejection> {
     Ok(res)
 }
 
-fn with_tera(
-    tera: Arc<Tera>,
-) -> impl Filter<Extract = (Arc<Tera>,), Error = std::convert::Infallible> + Clone {
-    warp::any().map(move || tera.clone())
+fn with_cloneable<T: Clone + std::marker::Send>(
+    t: T,
+) -> impl Filter<Extract = (T,), Error = std::convert::Infallible> + Clone {
+    warp::any().map(move || t.clone())
 }
 
 #[tokio::main(core_threads = 1)]
@@ -50,21 +50,27 @@ async fn main() {
     log::info!("The randomly generated files prefix is {:?}.", files_prefix);
 
     // Different types of Routes.
-    let favicon_route = warp::path("favicon.ico").map(|| serve_asset("favicon.ico").unwrap());
+    let favicon_route = warp::any()
+        .and(warp::path("favicon.ico"))
+        .map(|| serve_asset("favicon.ico").unwrap());
 
-    let files_route = warp::path(files_prefix.clone()).and(warp::fs::dir("."));
+    let files_route = warp::any()
+        .and(warp::path(files_prefix.clone()))
+        .and(warp::fs::dir("."));
 
-    let invalid_files_route = warp::path(files_prefix.clone())
-        .and(with_tera(tera.clone()))
+    let invalid_files_route = warp::any()
+        .and(warp::path(files_prefix.clone()))
+        .and(with_cloneable(tera.clone()))
         .map(|tera: Arc<Tera>| {
             let mut context = Context::new();
             context.insert("message", "The file you are searching for doesn't exist");
             warp::reply::html(tera.render("404.html", &context).unwrap())
         });
 
-    let dynamic_route = warp::path::full()
-        .and(with_tera(tera.clone()))
-        .and(warp::any().map(move || files_prefix.clone()))
+    let dynamic_route = warp::any()
+        .and(warp::path::full())
+        .and(with_cloneable(tera.clone()))
+        .and(with_cloneable(files_prefix.clone()))
         .and_then(
             |path: FullPath, tera: Arc<Tera>, files_prefix: String| async move {
                 let path = util::url_decode(path.as_str());
@@ -112,7 +118,6 @@ async fn main() {
                     let mut context = Context::new();
                     context.insert("files", &files);
                     context.insert("directories", &directories);
-
                     context.insert("files_prefix", &files_prefix);
 
                     Ok(warp::reply::html(

@@ -11,9 +11,10 @@ use warp::{http::HeaderValue, path::FullPath, reply::Response, Filter, Rejection
 
 mod cli;
 mod embed;
+mod templates;
 mod util;
 
-use embed::{Asset, Template};
+use embed::Asset;
 
 fn serve_asset(path: &str) -> Result<impl Reply, Rejection> {
     let asset = Asset::get(path).ok_or_else(warp::reject::not_found)?;
@@ -42,17 +43,7 @@ async fn main() {
     let bind_address: SocketAddr = opts.address.parse().expect("Invalid Bind Address");
 
     // Loading Tera templates.
-    let mut tera = Tera::default();
-
-    for file in Template::iter() {
-        let file_name = file.as_ref();
-        let file_contents = Template::get(file_name).unwrap();
-        let content = str::from_utf8(file_contents.as_ref()).unwrap();
-        tera.add_raw_template(file_name, content)
-            .expect("Failed to add raw template");
-    }
-
-    let tera = Arc::new(tera);
+    let tera = Arc::new(templates::fetch_templates());
 
     // Generating prefix for static files randomly.
     let files_prefix: String = thread_rng().sample_iter(&Alphanumeric).take(30).collect();

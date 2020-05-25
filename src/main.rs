@@ -4,6 +4,7 @@ use log;
 use mime_guess;
 use pretty_env_logger;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use std::env;
 use std::{net::SocketAddr, str, sync::Arc};
 use tera::{Context, Tera};
 use tokio::fs;
@@ -37,6 +38,9 @@ fn with_cloneable<T: Clone + std::marker::Send>(
 #[tokio::main(core_threads = 1)]
 async fn main() {
     dotenv::dotenv().unwrap_or_default();
+    if let Err(_) = dotenv::var("RUST_LOG") {
+        env::set_var("RUST_LOG", "info");
+    }
     pretty_env_logger::init();
 
     let opts = cli::Opts::parse();

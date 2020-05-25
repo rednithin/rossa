@@ -1,35 +1,19 @@
-use clap::{self, Clap};
+use clap::Clap;
 use dotenv;
 use log;
 use mime_guess;
 use pretty_env_logger;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
-use rust_embed::RustEmbed;
 use std::{net::SocketAddr, str, sync::Arc};
 use tera::{Context, Tera};
 use tokio::fs;
 use warp::{http::HeaderValue, path::FullPath, reply::Response, Filter, Rejection, Reply};
 
-/// A SimpleHTTPServer clone written in Rust.
-/// This is also inspired by gossa - https://github.com/pldubouilh/gossa.
-#[derive(Clap)]
-#[clap(
-    version = "0.1.0",
-    author = "P G Nithin Reddy <reddy.nithinpg@gmail.com>"
-)]
-struct Opts {
-    /// `address` must be of the form <IP>:<Port>
-    #[clap(short, long, default_value = "0.0.0.0:8888")]
-    address: String,
-}
+mod cli;
+mod embed;
+mod util;
 
-#[derive(RustEmbed)]
-#[folder = "assets"]
-struct Asset;
-
-#[derive(RustEmbed)]
-#[folder = "templates"]
-struct Template;
+use embed::{Asset, Template};
 
 fn serve_asset(path: &str) -> Result<impl Reply, Rejection> {
     let asset = Asset::get(path).ok_or_else(warp::reject::not_found)?;
@@ -49,40 +33,12 @@ fn with_tera(
     warp::any().map(move || tera.clone())
 }
 
-fn append_frag(text: &mut String, frag: &mut String) {
-    if !frag.is_empty() {
-        let encoded = frag
-            .chars()
-            .collect::<Vec<char>>()
-            .chunks(2)
-            .map(|ch| u8::from_str_radix(&ch.iter().collect::<String>(), 16).unwrap())
-            .collect::<Vec<u8>>();
-        text.push_str(&std::str::from_utf8(&encoded).unwrap());
-        frag.clear();
-    }
-}
-
-fn url_decode(text: &str) -> String {
-    let mut output = String::new();
-    let mut encoded_ch = String::new();
-    let mut iter = text.chars();
-    while let Some(ch) = iter.next() {
-        if ch == '%' {
-            encoded_ch.push_str(&format!("{}{}", iter.next().unwrap(), iter.next().unwrap()));
-        } else {
-            append_frag(&mut output, &mut encoded_ch);
-            output.push(ch);
-        }
-    }
-    append_frag(&mut output, &mut encoded_ch);
-    output
-}
-
 #[tokio::main(core_threads = 1)]
 async fn main() {
     dotenv::dotenv().unwrap_or_default();
     pretty_env_logger::init();
-    let opts: Opts = Opts::parse();
+
+    let opts = cli::Opts::parse();
     let bind_address: SocketAddr = opts.address.parse().expect("Invalid Bind Address");
 
     // Loading Tera templates.
@@ -120,7 +76,7 @@ async fn main() {
         .and(warp::any().map(move || files_prefix.clone()))
         .and_then(
             |path: FullPath, tera: Arc<Tera>, files_prefix: String| async move {
-                let path = url_decode(path.as_str());
+                let path = util::url_decode(path.as_str());
                 if let Ok(mut entries) = fs::read_dir(".".to_string() + path.as_str()).await {
                     log::info!("entries {:?}", entries);
 

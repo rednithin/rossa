@@ -117,7 +117,15 @@ async fn main() {
                         }
                     }
                     if path.as_str() != "/" {
-                        directories.push((String::from(".."), String::from("..")));
+                        let mut tokens: Vec<&str> = path.as_str().split("/").collect();
+                        tokens.pop();
+                        let parent_path = if tokens.len() == 1 {
+                            "/".to_string()
+                        } else {
+                            tokens.join("/")
+                        };
+                        log::info!("Parent path {:?}", parent_path);
+                        directories.push((String::from(".."), parent_path));
                     }
 
                     log::info!("The path is {:?}", path);

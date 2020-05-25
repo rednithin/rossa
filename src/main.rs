@@ -163,7 +163,8 @@ async fn main() {
         .and(favicon_route)
         .or(files_route)
         .or(invalid_files_route)
-        .or(dynamic_route);
+        .or(dynamic_route)
+        .with(warp::log("requests"));
 
     warp::serve(routes).run(bind_address).await;
 }

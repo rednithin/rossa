@@ -13,7 +13,7 @@
       {% if loop.first %}
         <h4> Directories </h4>
       {% endif %}
-      <a href="./{{ directory[0] }}">
+      <a href="{{ directory[1] }}">
         {{ directory[0] }}
       </a>
       <br />
@@ -25,7 +25,7 @@
       {% if loop.first %}
         <h4> Files </h4>
       {% endif %}
-      <a href="/{{ files_prefix }}/{{ file[1] }}">
+      <a href="/{{ files_prefix }}{{ file[1] }}">
         {{ file[0] }}
       </a>
       <br />

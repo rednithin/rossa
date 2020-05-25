@@ -103,12 +103,12 @@ async fn main() {
                                 if entry_type.is_dir() {
                                     directories.push((entry.file_name().into_string().unwrap(), {
                                         let x = entry.path();
-                                        x.to_str().unwrap().to_string()
+                                        x.to_str().unwrap()[1..].to_string()
                                     }));
                                 } else {
                                     files.push((entry.file_name().into_string().unwrap(), {
                                         let x = entry.path();
-                                        x.to_str().unwrap().to_string()
+                                        x.to_str().unwrap()[1..].to_string()
                                     }));
                                 }
                             }

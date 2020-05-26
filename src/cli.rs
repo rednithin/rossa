@@ -4,7 +4,7 @@ use clap::{self, Clap};
 /// This is also inspired by gossa - https://github.com/pldubouilh/gossa.
 #[derive(Clap)]
 #[clap(
-    version = "0.1.0",
+    version = "0.1.1",
     author = "P G Nithin Reddy <reddy.nithinpg@gmail.com>"
 )]
 pub struct Opts {

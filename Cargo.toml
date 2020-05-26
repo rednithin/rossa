@@ -3,6 +3,11 @@ name = "rossa"
 version = "0.1.0"
 authors = ["rednithin <reddy.nithinpg@live.com>"]
 edition = "2018"
+license = "MIT"
+description = "Attempt to create a SimpleHTTPServer in Rust. Also inspired by gossa."
+repository = "https://github.com/rednithin/rossa"
+readme = "README.md"
+keywords = ["file-server"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

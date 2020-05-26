@@ -5,4 +5,48 @@
 
 # rossa
 
-Attempt to create a SimpleHTTPServer in Rust. Also inspired by gossa.
+Attempt to create file server like SimpleHTTPServer in Rust. Also inspired by gossa.
+
+## Installation
+
+```
+cargo install rossa
+```
+
+## Usage
+
+```
+rossa
+```
+
+### To use with custom host and port
+
+```
+rossa -a <host>:<port>
+```
+
+> Example
+
+```
+rossa -a 127.0.0.1:3333
+```
+
+## In Action
+
+![Gif](https://i.makeagif.com/media/5-26-2020/bLQ17-.gif)
+
+## Inspired By
+
+- [https://github.com/pldubouilh/gossa](Gossa)
+- [https://docs.python.org/2/library/simplehttpserver.html](SimpleHTTPServer)
+
+## Technologies Used
+
+| Technology   | Purpose                                          |
+| ------------ | ------------------------------------------------ |
+| `warp`       | Web Framework                                    |
+| `tokio`      | Async `fs`                                       |
+| `tera`       | Templating                                       |
+| `clap`       | CLI Interface                                    |
+| `rand`       | To generate random files prefix                  |
+| `rust-embed` | To embed assets and templates into single binary |

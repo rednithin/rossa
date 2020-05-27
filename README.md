@@ -40,6 +40,10 @@ rossa -a 127.0.0.1:3333
 - [https://github.com/pldubouilh/gossa](Gossa)
 - [https://docs.python.org/2/library/simplehttpserver.html](SimpleHTTPServer)
 
+## Similar Software
+
+- [https://github.com/brson/basic-http-server](basic-http-server)
+
 ## Technologies Used
 
 | Technology   | Purpose                                          |

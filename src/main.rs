@@ -137,8 +137,8 @@ async fn main() {
                     files.sort_unstable();
 
                     log::info!("The path is {:?}", path);
-                    log::info!("Directories: {:?}", directories);
-                    log::info!("Files: {:?}", files);
+                    log::debug!("Directories: {:?}", directories);
+                    log::debug!("Files: {:?}", files);
 
                     let mut context = Context::new();
                     context.insert("files", &files);

@@ -37,12 +37,12 @@ rossa -a 127.0.0.1:3333
 
 ## Inspired By
 
-- [https://github.com/pldubouilh/gossa](Gossa)
-- [https://docs.python.org/2/library/simplehttpserver.html](SimpleHTTPServer)
+- [Gossa](https://github.com/pldubouilh/gossa)
+- [SimpleHTTPServer](https://docs.python.org/2/library/simplehttpserver.html)
 
 ## Similar Software
 
-- [https://github.com/brson/basic-http-server](basic-http-server)
+- [basic-http-server](https://github.com/brson/basic-http-server)
 
 ## Technologies Used
 

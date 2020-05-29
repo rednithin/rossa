@@ -1,4 +1,4 @@
-[![GHA Build Status](https://github.com/rednithin/rossa/workflows/Rust/badge.svg?branch=master&event=push)](https://github.com/rednithin/rossa/actions?query=workflow%3ARust)
+[![Build and Test](https://github.com/rednithin/rossa/workflows/Build%20and%20Test/badge.svg?branch=master)](https://github.com/rednithin/rossa/actions?query=workflow%3A%22Build+and+Test%22+branch%3Amaster)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![crates.io](https://img.shields.io/crates/v/rossa.svg)](https://crates.io/crates/rossa)
 [![Released API docs](https://docs.rs/rossa/badge.svg)](https://docs.rs/rossa)

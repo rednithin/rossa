@@ -9,8 +9,16 @@ Attempt to create file server like SimpleHTTPServer in Rust. Also inspired by go
 
 ## Installation
 
+### Using cargo
+
 ```
 cargo install rossa
+```
+
+### Using snap
+
+```
+snap install rossa --devmode --edge
 ```
 
 ## Usage

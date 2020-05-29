@@ -15,6 +15,14 @@ Attempt to create file server like SimpleHTTPServer in Rust. Also inspired by go
 cargo install rossa
 ```
 
+### Using the AUR
+
+```
+yay -S rossa-bin
+```
+
+Note: You can use other [AUR helpers](https://wiki.archlinux.org/index.php/AUR_helpers) as well.
+
 ### Using snap
 
 ```

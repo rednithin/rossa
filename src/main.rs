@@ -1,8 +1,10 @@
+#![deny(clippy::pedantic)]
+#![deny(clippy::nursery)]
+#![forbid(unsafe_code)]
+// #![deny(clippy::unwrap_used)]
+#![deny(clippy::panic)]
+
 use clap::Clap;
-use dotenv;
-use log;
-use mime_guess;
-use pretty_env_logger;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use std::env;
 use std::{net::SocketAddr, str, sync::Arc};
@@ -38,7 +40,7 @@ fn with_cloneable<T: Clone + std::marker::Send>(
 #[tokio::main(core_threads = 1)]
 async fn main() {
     dotenv::dotenv().unwrap_or_default();
-    if let Err(_) = dotenv::var("RUST_LOG") {
+    if dotenv::var("RUST_LOG").is_err() {
         env::set_var("RUST_LOG", "info");
     }
     pretty_env_logger::init();
@@ -47,7 +49,7 @@ async fn main() {
     let bind_address: SocketAddr = opts.address.parse().expect("Invalid Bind Address");
 
     // Loading Tera templates.
-    let tera = Arc::new(templates::fetch_templates());
+    let tera = Arc::new(templates::fetch());
 
     // Generating prefix for static files randomly.
     let files_prefix: String = thread_rng().sample_iter(&Alphanumeric).take(30).collect();
@@ -122,7 +124,7 @@ async fn main() {
                     }
 
                     if path.as_str() != "/" {
-                        let mut tokens: Vec<&str> = path.as_str().split("/").collect();
+                        let mut tokens: Vec<&str> = path.as_str().split('/').collect();
                         tokens.pop();
                         let parent_path = if tokens.len() == 1 {
                             "/".to_string()

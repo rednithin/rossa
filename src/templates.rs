@@ -2,7 +2,7 @@ use super::embed::Template;
 use std::str;
 use tera::Tera;
 
-pub fn fetch_templates() -> Tera {
+pub fn fetch() -> Tera {
     let mut tera = Tera::default();
 
     for file in Template::iter() {

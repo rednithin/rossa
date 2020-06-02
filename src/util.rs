@@ -6,7 +6,7 @@ fn append_frag(text: &mut String, frag: &mut String) {
             .chunks(2)
             .map(|ch| u8::from_str_radix(&ch.iter().collect::<String>(), 16).unwrap())
             .collect::<Vec<u8>>();
-        text.push_str(&std::str::from_utf8(&encoded).unwrap());
+        text.push_str(std::str::from_utf8(&encoded).unwrap());
         frag.clear();
     }
 }

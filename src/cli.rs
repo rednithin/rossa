@@ -1,7 +1,7 @@
 use clap::{self, Clap};
 
-/// A SimpleHTTPServer clone written in Rust.
-/// This is also inspired by gossa - https://github.com/pldubouilh/gossa.
+/// A `SimpleHTTPServer` clone written in Rust.
+/// This is also inspired by gossa - <https://github.com/pldubouilh/gossa>.
 #[derive(Clap)]
 #[clap(
     version = "0.1.1",
